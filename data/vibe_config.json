@@ -1,0 +1,117 @@
+{
+  "model_name": "all-MiniLM-L6-v2",
+  "feature_anchors": {
+    "energy": {
+      "high": "aggressive intense high energy powerful loud explosive",
+      "low": "calm quiet peaceful soft gentle slow relaxing"
+    },
+    "valence": {
+      "high": "happy joyful uplifting positive cheerful euphoric",
+      "low": "sad melancholic heartbreak depression dark hopeless"
+    },
+    "acousticness": {
+      "high": "acoustic guitar folk unplugged intimate raw organic",
+      "low": "electronic synthesizer digital produced beats drops"
+    },
+    "danceability": {
+      "high": "dance groove rhythm party club beat move body",
+      "low": "still slow ambient cinematic atmospheric no beat"
+    },
+    "tempo": {
+      "high": "fast rushing urgent driving momentum quick rapid",
+      "low": "slow dragging languid floating drifting unhurried"
+    },
+    "darkness": {
+      "high": "dark brooding sinister haunting ominous noir shadow",
+      "low": "bright light sunny warm radiant open airy"
+    }
+  },
+  "tag_preference_map": {
+    "energy_low": [
+      "ambient",
+      "chillout",
+      "acoustic",
+      "soft",
+      "calm"
+    ],
+    "energy_high": [
+      "electronic",
+      "rock",
+      "punk",
+      "intense",
+      "power"
+    ],
+    "valence_low": [
+      "sadcore",
+      "melancholic",
+      "dark",
+      "emotional",
+      "depression"
+    ],
+    "valence_high": [
+      "happy",
+      "upbeat",
+      "feel good",
+      "summer",
+      "fun"
+    ],
+    "acousticness_high": [
+      "acoustic",
+      "folk",
+      "singer-songwriter",
+      "unplugged"
+    ],
+    "acousticness_low": [
+      "electronic",
+      "synth",
+      "digital",
+      "edm",
+      "produced"
+    ],
+    "danceability_high": [
+      "dance",
+      "groove",
+      "club",
+      "party",
+      "rhythm"
+    ],
+    "danceability_low": [
+      "ambient",
+      "post-rock",
+      "instrumental",
+      "atmospheric"
+    ],
+    "tempo_low": [
+      "slow",
+      "ballad",
+      "downtempo",
+      "dream pop",
+      "shoegaze"
+    ],
+    "tempo_high": [
+      "fast",
+      "punk",
+      "drum and bass",
+      "uptempo"
+    ],
+    "darkness_high": [
+      "dark",
+      "gothic",
+      "noir",
+      "brooding",
+      "haunting"
+    ],
+    "darkness_low": [
+      "bright",
+      "indie pop",
+      "sunshine pop",
+      "warm"
+    ]
+  },
+  "weights": {
+    "alpha": 0.35,
+    "beta": 0.45,
+    "gamma": 0.2
+  },
+  "contrast_strength": 2.5
+}

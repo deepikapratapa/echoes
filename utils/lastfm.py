@@ -2,43 +2,44 @@ import os
 import pylast
 import pandas as pd
 from dotenv import load_dotenv
+from functools import lru_cache
 
-load_dotenv('/Users/saturnine/echoes/.env', override=True)
+load_dotenv()
 
 API_KEY = os.getenv("LASTFM_API_KEY")
 API_SECRET = os.getenv("LASTFM_SECRET")
 
 def get_network():
-    load_dotenv('/Users/saturnine/echoes/.env', override=True)
     return pylast.LastFMNetwork(
-        api_key=os.getenv("LASTFM_API_KEY"),
-        api_secret=os.getenv("LASTFM_SECRET")
+        api_key=API_KEY,
+        api_secret=API_SECRET
     )
 
-def get_user(username):
-    return get_network().get_user(username)
+def get_user(username: str):
+    network = get_network()
+    return network.get_user(username)
 
-def get_top_artists(username, limit=20):
+# ── Top artists ────────────────────────────────────────────────
+def get_top_artists(username: str, limit: int = 20) -> pd.DataFrame:
     user = get_user(username)
     top = user.get_top_artists(period=pylast.PERIOD_OVERALL, limit=limit)
+    
     rows = []
     for item in top:
         artist = item.item
-        try:
-            image = artist.get_cover_image()
-        except:
-            image = ""
         rows.append({
             "name": artist.name,
             "playcount": int(item.weight),
             "url": artist.get_url(),
-            "image": image,
+            "image": get_artist_image(artist),
         })
     return pd.DataFrame(rows)
 
-def get_top_tracks(username, limit=50):
+# ── Top tracks ─────────────────────────────────────────────────
+def get_top_tracks(username: str, limit: int = 50) -> pd.DataFrame:
     user = get_user(username)
     top = user.get_top_tracks(period=pylast.PERIOD_OVERALL, limit=limit)
+    
     rows = []
     for item in top:
         track = item.item
@@ -50,9 +51,11 @@ def get_top_tracks(username, limit=50):
         })
     return pd.DataFrame(rows)
 
-def get_recent_tracks(username, limit=200):
+# ── Recent tracks ──────────────────────────────────────────────
+def get_recent_tracks(username: str, limit: int = 200) -> pd.DataFrame:
     user = get_user(username)
     recent = user.get_recent_tracks(limit=limit)
+    
     rows = []
     for track in recent:
         rows.append({
@@ -62,58 +65,70 @@ def get_recent_tracks(username, limit=200):
         })
     df = pd.DataFrame(rows)
     if not df.empty:
-        df["datetime"] = pd.to_datetime(pd.to_numeric(df["timestamp"], errors="coerce"), unit="s")
+        df["datetime"] = pd.to_datetime(df["timestamp"], unit="s", errors="coerce")
         df["hour"] = df["datetime"].dt.hour
         df["day"] = df["datetime"].dt.day_name()
         df["month"] = df["datetime"].dt.to_period("M").astype(str)
     return df
 
-def get_artist_tags(artist_name, limit=10):
+# ── Artist tags ────────────────────────────────────────────────
+def get_artist_tags(artist_name: str, limit: int = 10) -> list[str]:
     try:
-        artist = get_network().get_artist(artist_name)
+        network = get_network()
+        artist = network.get_artist(artist_name)
         tags = artist.get_top_tags(limit=limit)
         return [t.item.name.lower() for t in tags]
-    except Exception as e:
-        print(f"Tags error: {e}")
+    except Exception:
         return []
 
-def get_similar_artists(artist_name, limit=10):
+# ── Similar artists ────────────────────────────────────────────
+def get_similar_artists(artist_name: str, limit: int = 10) -> list[str]:
     try:
-        artist = get_network().get_artist(artist_name)
+        network = get_network()
+        artist = network.get_artist(artist_name)
         similar = artist.get_similar(limit=limit)
         return [s.item.name for s in similar]
-    except Exception as e:
-        print(f"Similar error: {e}")
+    except Exception:
         return []
 
-def get_similar_users(username, limit=10):
+# ── Similar users (for collaborative filtering) ────────────────
+def get_similar_users(username: str, limit: int = 10) -> list[str]:
     try:
         user = get_user(username)
         neighbors = user.get_neighbours(limit=limit)
         return [n.item.name for n in neighbors]
-    except Exception as e:
-        print(f"Similar users error: {e}")
+    except Exception:
         return []
 
-def get_user_info(username):
+# ── Artist image ───────────────────────────────────────────────
+def get_artist_image(artist) -> str:
+    try:
+        return artist.get_cover_image()
+    except Exception:
+        return ""
+
+# ── User info ──────────────────────────────────────────────────
+def get_user_info(username: str) -> dict:
     try:
         user = get_user(username)
         return {
             "username": username,
+            "real_name": user.get_name(),
             "playcount": user.get_playcount(),
             "registered": user.get_registered(),
             "image": user.get_image(),
             "url": user.get_url(),
         }
-    except Exception as e:
-        print(f"User info error: {e}")
+    except Exception:
         return {"username": username}
 
-def build_user_profile(username):
+# ── Build full user profile (single call for the app) ─────────
+def build_user_profile(username: str) -> dict:
     print(f"Fetching profile for {username}...")
     return {
-        "info":        get_user_info(username),
-        "top_artists": get_top_artists(username, limit=20),
-        "top_tracks":  get_top_tracks(username, limit=50),
-        "recent":      get_recent_tracks(username, limit=200),
+        "info":         get_user_info(username),
+        "top_artists":  get_top_artists(username, limit=20),
+        "top_tracks":   get_top_tracks(username, limit=50),
+        "recent":       get_recent_tracks(username, limit=200),
     }
+```
