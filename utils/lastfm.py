@@ -3,13 +3,17 @@ import pylast
 import pandas as pd
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv('/Users/saturnine/echoes/.env', override=True)
 
-API_KEY = os.getenv("6ab2ebcbe6d3ed50f425f0c85b2793e8")
-API_SECRET = os.getenv("7383bf8331dce497f86efd67013633c1")
+API_KEY = os.getenv("LASTFM_API_KEY")
+API_SECRET = os.getenv("LASTFM_SECRET")
 
 def get_network():
-    return pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
+    load_dotenv('/Users/saturnine/echoes/.env', override=True)
+    return pylast.LastFMNetwork(
+        api_key=os.getenv("LASTFM_API_KEY"),
+        api_secret=os.getenv("LASTFM_SECRET")
+    )
 
 def get_user(username):
     return get_network().get_user(username)
@@ -69,7 +73,8 @@ def get_artist_tags(artist_name, limit=10):
         artist = get_network().get_artist(artist_name)
         tags = artist.get_top_tags(limit=limit)
         return [t.item.name.lower() for t in tags]
-    except:
+    except Exception as e:
+        print(f"Tags error: {e}")
         return []
 
 def get_similar_artists(artist_name, limit=10):
@@ -77,7 +82,8 @@ def get_similar_artists(artist_name, limit=10):
         artist = get_network().get_artist(artist_name)
         similar = artist.get_similar(limit=limit)
         return [s.item.name for s in similar]
-    except:
+    except Exception as e:
+        print(f"Similar error: {e}")
         return []
 
 def get_similar_users(username, limit=10):
@@ -85,7 +91,8 @@ def get_similar_users(username, limit=10):
         user = get_user(username)
         neighbors = user.get_neighbours(limit=limit)
         return [n.item.name for n in neighbors]
-    except:
+    except Exception as e:
+        print(f"Similar users error: {e}")
         return []
 
 def get_user_info(username):
@@ -98,7 +105,8 @@ def get_user_info(username):
             "image": user.get_image(),
             "url": user.get_url(),
         }
-    except:
+    except Exception as e:
+        print(f"User info error: {e}")
         return {"username": username}
 
 def build_user_profile(username):
