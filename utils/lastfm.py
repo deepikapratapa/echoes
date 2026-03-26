@@ -62,7 +62,7 @@ def get_recent_tracks(username, limit=200):
         })
     df = pd.DataFrame(rows)
     if not df.empty:
-        df["datetime"] = pd.to_datetime(df["timestamp"], unit="s", errors="coerce")
+        df["datetime"] = pd.to_datetime(pd.to_numeric(df["timestamp"], errors="coerce"), unit="s")
         df["hour"] = df["datetime"].dt.hour
         df["day"] = df["datetime"].dt.day_name()
         df["month"] = df["datetime"].dt.to_period("M").astype(str)
