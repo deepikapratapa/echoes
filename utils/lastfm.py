@@ -131,4 +131,21 @@ def build_user_profile(username: str) -> dict:
         "top_tracks":   get_top_tracks(username, limit=50),
         "recent":       get_recent_tracks(username, limit=200),
     }
-```
+
+
+def get_artist_top_track(artist_name: str) -> dict:
+    """Get the top track for an artist."""
+    try:
+        network = get_network()
+        artist  = network.get_artist(artist_name)
+        tracks  = artist.get_top_tracks(limit=3)
+        if tracks:
+            track = tracks[0].item
+            return {
+                "title":  track.title,
+                "artist": artist_name,
+                "url":    track.get_url(),
+            }
+        return {"title": "—", "artist": artist_name, "url": ""}
+    except Exception:
+        return {"title": "—", "artist": artist_name, "url": ""}
